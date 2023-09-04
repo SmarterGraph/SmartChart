@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     description="Smart Chart Made by Text Description",
     long_description=open('README.md').read(),
-    author='Rui Tang, Yikai Yang',
-    author_email='tomtrac@hotmail.com',
+    author='SmartGraph',
+    author_email='smartergraph@gmail.com',
     url='https://github.com/SmarterGraph/SmartChart'
 )
