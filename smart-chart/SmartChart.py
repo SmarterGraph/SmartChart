@@ -1,6 +1,6 @@
 import pandas as pd
-from llms.openai import OpenAI
-from prompts.get_matplotlib_code import GetMatplotlibCode
+from llms.gpt_all import OpenAI
+from prompts.generate_code import GetCode
 from data.DataLoader import load_file_into_dataframe
 from plots.MatplotlibWorker import matplotlib_run_code
 from plots.PlotlyWorker import plotly_run_code
@@ -27,13 +27,16 @@ class SmartChart:
             backend (str): The backend to use. Either "matplotlib" or "plotly".
             question (str): The question to answer.
         """
-        self.inputs = {
-            "question": question,
-            "columns": self.columns,
-        }
-        instructions = str(GetMatplotlibCode(**self.inputs))
-
-        code = self.llm.generate_code(instructions)
+        instructions = str(
+            GetCode(
+                df_columns=self.columns,
+                user_input=question,
+                python_package=backend,
+            )
+        )
+        code = self.llm.query_chat_completion(instructions).split("```")[1]
+        print(code)
+        # code = self.llm.generate_code(instructions)
 
         if backend == "matplotlib":
             matplotlib_run_code(code, self.df)
@@ -45,7 +48,5 @@ class SmartChart:
 
 if __name__ == "__main__":
     sc = SmartChart()
-    sc.load_data("data/iris.csv")
-    sc.plot(
-        "matplotlib", "Plot a scatter plot of the sepal length vs sepal width"
-    )
+    sc.load_data("iris.csv")
+    sc.plot("plotly", "Plot a scatter plot of the sepal length vs sepal width")

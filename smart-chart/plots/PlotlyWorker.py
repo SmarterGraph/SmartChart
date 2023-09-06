@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from utils.CodeExecuter import CodeExecuter
+from utils.CodeExecuter import execute_code
 import pandas as pd
 
 
@@ -10,4 +10,4 @@ def plotly_run_code(code: str, df: pd.DataFrame) -> None:
         df (pd.DataFrame): The DataFrame to use.
     """
     imports = {"go": go, "df": df}
-    CodeExecuter.execute_code(code, imports)
+    execute_code(code, imports)

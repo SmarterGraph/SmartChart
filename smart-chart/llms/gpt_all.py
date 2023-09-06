@@ -24,7 +24,7 @@ class OpenAI:
     def __init__(
         self,
         api_key: str = None,
-        model_name: str = "gpt-4",
+        model_name: str = "gpt-3.5-turbo",
         temperature: float = 0.1,
         max_tokens: int = 1000,
         top_p: float = 1,

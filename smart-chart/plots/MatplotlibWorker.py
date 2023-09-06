@@ -1,6 +1,9 @@
+import matplotlib
+
+matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
-from utils.CodeExecuter import CodeExecuter
+from utils.CodeExecuter import execute_code
 
 
 def matplotlib_run_code(code: str, df: pd.DataFrame) -> None:
@@ -11,4 +14,4 @@ def matplotlib_run_code(code: str, df: pd.DataFrame) -> None:
         df (pd.DataFrame): The DataFrame to use.
     """
     imports = {"plt": plt, "df": df}
-    CodeExecuter.execute_code(code, imports)
+    execute_code(code, imports)
