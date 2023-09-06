@@ -25,4 +25,4 @@ class BasePrompt:
         """
         if self.prompt_context is None:
             print("Prompt Context is not set.")
-        return self.context.format(**self.key_words)
+        return self.prompt_context.format(**self.key_words)

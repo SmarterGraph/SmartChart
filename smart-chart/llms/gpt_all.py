@@ -32,7 +32,7 @@ class OpenAI:
         presence_penalty: float = 0,
     ):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        if api_key is None:
+        if self.api_key is None:
             raise ValueError("API key is not set.")
         self.model_name = model_name
         self.temperature = temperature
@@ -66,7 +66,7 @@ class OpenAI:
                 }
             ],
         }
-        response = openai.chatCompletion.create(**params)
+        response = openai.ChatCompletion.create(**params)
         message = response["choices"][0]["message"]["content"]
 
         self.add_history(value, message)
