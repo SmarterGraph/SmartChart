@@ -15,7 +15,8 @@ def execute_code(code_string, imports) -> str:
 
     with redirect_stdout(io.StringIO()) as output:
         try:
-            exec(code_string, imports)
+            local_vars = {}
+            exec(code_string, imports, local_vars)
         except Exception as e:
             raise e
 
@@ -24,6 +25,9 @@ def execute_code(code_string, imports) -> str:
     last_line = lines[-1].strip()
 
     try:
-        return eval(last_line, imports)
+        if "go" in imports.keys():
+            return local_vars.get("fig", None)
+        else:
+            return eval(last_line, imports)
     except Exception:
         return captured_output

@@ -1,35 +1,16 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-import webbrowser
-import requests
-import tempfile
+from smart_chart.plots.PlotUtils import generate_plot
 
 
 def matplotlib_run_code(code: str, df: pd.DataFrame) -> None:
-    url = "http://127.0.0.1:5000/plot"
+    """Generate a Matplotlib plot using the provided code and DataFrame.
 
-    payload = {
-        "code": code,
-        "data": df.to_json(orient="split"),
-    }
-    response = requests.post(
-        url,
-        json=payload,
-    )
-
-    # Check if the server responded with a success status
-    if response.status_code != 200:
-        print(
-            f"Server responded with an error: {response.status_code}. {response.text}"
-        )
-        return
-
-    # Save the HTML response to a temporary file
-    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as f:
-        url = "file://" + f.name
-        f.write(response.text)
-    # Open the HTML file in the default web browser
-    webbrowser.open(url)
+    Args:
+        code (str): The code to execute.
+        df (pd.DataFrame): The DataFrame to use.
+    """
+    url = "http://127.0.0.1:5000/matplotlib"
+    generate_plot(url, code, df)
 
 
 if __name__ == "__main__":

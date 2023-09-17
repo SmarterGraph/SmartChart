@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from smart_chart.utils.CodeExecuter import execute_code
+import plotly.graph_objs as go
+import plotly.io as pio
 
 app = Flask(__name__)
 
@@ -16,8 +18,8 @@ def index():
     return render_template("plot.html")
 
 
-@app.route("/plot", methods=["POST"])
-def plot():
+@app.route("/matplotlib", methods=["POST"])
+def plot_matplotlib():
     # Get the code from the query parameter
     data = request.json
     code = data["code"]
@@ -36,7 +38,30 @@ def plot():
     except Exception as e:
         # Handle any errors that arise during code execution
         return f"Error executing the code: {str(e)}", 400
-    return render_template("plot.html", image_data=image_base64)
+    return render_template("plot_matplotlib.html", image_data=image_base64)
+
+
+@app.route("/plotly", methods=["POST"])
+def plot_plotly():
+    # Get the code from the query parameter
+    data = request.json
+    code = data["code"]
+    df = pd.read_json(data["data"], orient="split")
+    fig = go.Figure()
+
+    # Try executing the code
+    try:
+        fig = execute_code(code, {"go": go, "df": df})
+        if fig is None:
+            raise ValueError(
+                "The provided code did not produce a Plotly figure."
+            )
+        fig_div = pio.to_html(fig, full_html=False)
+
+    except Exception as e:
+        # Handle any errors that arise during code execution
+        return f"Error executing the code: {str(e)}", 400
+    return render_template("plot_plotly.html", div_placeholder=fig_div)
 
 
 if __name__ == "__main__":
