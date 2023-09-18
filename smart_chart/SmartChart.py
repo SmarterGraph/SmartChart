@@ -27,6 +27,9 @@ class SmartChart:
             backend (str): The backend to use. Either "matplotlib" or "plotly".
             question (str): The question to answer.
         """
+        # make sure to use go as the plotting package
+        if backend == "plotly":
+            question += " use go as the plotting package"
         instructions = str(
             GetCode(
                 df_columns=self.columns,
@@ -36,7 +39,6 @@ class SmartChart:
         )
         code = self.llm.query_chat_completion(instructions).split("```")[1]
         print(code)
-        # code = self.llm.generate_code(instructions)
 
         if backend == "matplotlib":
             matplotlib_run_code(code, self.df)
@@ -49,4 +51,7 @@ class SmartChart:
 if __name__ == "__main__":
     sc = SmartChart()
     sc.load_data("iris.csv")
-    sc.plot("plotly", "Plot a scatter plot of the sepal length vs sepal width")
+    sc.plot(
+        "plotly",
+        "Plot a scatter plot of the sepal length vs sepal width",
+    )
