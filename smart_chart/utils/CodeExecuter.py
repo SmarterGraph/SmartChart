@@ -16,9 +16,13 @@ def execute_code(code_string, imports) -> str:
     with redirect_stdout(io.StringIO()) as output:
         try:
             local_vars = {}
-            exec(code_string, imports, local_vars)
+            exec(code_string, global_env, local_vars)
         except Exception as e:
-            raise e
+            # Capture more context about the error
+            error_msg = (
+                f"Error executing code: '{code_string}'. Error: {str(e)}"
+            )
+            raise ValueError(error_msg) from e
 
     captured_output = output.getvalue()
     lines = code_string.strip().split("\n")
@@ -28,6 +32,7 @@ def execute_code(code_string, imports) -> str:
         if "go" in imports.keys():
             return local_vars.get("fig", None)
         else:
-            return eval(last_line, imports)
-    except Exception:
-        return captured_output
+            return eval(last_line, global_env)
+    except Exception as e:
+        # Return any captured output or if there's none, return the error message.
+        return captured_output or str(e)

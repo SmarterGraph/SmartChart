@@ -1,5 +1,5 @@
 import pandas as pd
-from smart_chart.plots.PlotUtils import generate_plot
+from smart_chart.plots.PlotUtils import generate_plot, return_figure
 
 
 def matplotlib_run_code(code: str, df: pd.DataFrame) -> None:
@@ -11,6 +11,16 @@ def matplotlib_run_code(code: str, df: pd.DataFrame) -> None:
     """
     url = "http://127.0.0.1:5000/matplotlib"
     generate_plot(url, code, df)
+
+
+def matplotlib_return_figure(code: str, df: pd.DataFrame) -> str:
+    """Generate a Matplotlib plot using the provided code and DataFrame.
+
+    Args:
+        code (str): The code to execute.
+        df (pd.DataFrame): The DataFrame to use.
+    """
+    return return_figure(code, df, "matplotlib")
 
 
 if __name__ == "__main__":

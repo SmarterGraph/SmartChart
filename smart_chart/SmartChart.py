@@ -1,10 +1,17 @@
 import pandas as pd
-from llms.gpt_all import OpenAI
-from prompts.generate_code import GetCode
-from data.DataLoader import load_file_into_dataframe
-from plots.MatplotlibWorker import matplotlib_run_code
-from plots.PlotlyWorker import plotly_run_code
+from smart_chart.llms.gpt_all import OpenAI
+from smart_chart.prompts.generate_code import GetCode
+from smart_chart.data.DataLoader import load_file_into_dataframe
+from smart_chart.plots.MatplotlibWorker import (
+    matplotlib_run_code,
+    matplotlib_return_figure,
+)
+from smart_chart.plots.PlotlyWorker import (
+    plotly_run_code,
+    plotly_return_figure,
+)
 from typing import Optional
+import re
 
 
 class SmartChart:
@@ -38,12 +45,14 @@ class SmartChart:
             )
         )
         code = self.llm.query_chat_completion(instructions).split("```")[1]
-        print(code)
+        code = re.sub(r"\bpython\b", "", code)
 
         if backend == "matplotlib":
-            matplotlib_run_code(code, self.df)
+            # matplotlib_run_code(code, self.df)
+            return matplotlib_return_figure(code, self.df), code
         elif backend == "plotly":
-            plotly_run_code(code, self.df)
+            # plotly_run_code(code, self.df)
+            return plotly_return_figure(code, self.df), code
         else:
             raise ValueError(f"Unsupported backend: {backend}")
 

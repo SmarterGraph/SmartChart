@@ -1,5 +1,5 @@
 import pandas as pd
-from smart_chart.plots.PlotUtils import generate_plot
+from smart_chart.plots.PlotUtils import generate_plot, return_figure
 
 
 def plotly_run_code(code: str, df: pd.DataFrame) -> None:
@@ -12,6 +12,18 @@ def plotly_run_code(code: str, df: pd.DataFrame) -> None:
     if "fig.show()" in code:
         code = code.replace("fig.show()", "")
     generate_plot(url, code, df)
+
+
+def plotly_return_figure(code: str, df: pd.DataFrame) -> str:
+    """Generate a Matplotlib plot using the provided code and DataFrame.
+
+    Args:
+        code (str): The code to execute.
+        df (pd.DataFrame): The DataFrame to use.
+    """
+    if "fig.show()" in code:
+        code = code.replace("fig.show()", "")
+    return return_figure(code, df, "plotly")
 
 
 if __name__ == "__main__":

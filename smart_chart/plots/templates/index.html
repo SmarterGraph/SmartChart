@@ -1,0 +1,195 @@
+{% extends 'base.html' %} {% block title %} Describe what do you want to plot {%
+endblock %} {% block content %}
+<div class="data_loader">
+  <input type="file" id="fileInput" accept=".csv" />
+</div>
+<div class="card">
+  <div class="card-body">
+    <div id="chat-box" class="mb-3">
+      <!-- Chat messages will appear here -->
+    </div>
+    <form id="chat-form">
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          id="message"
+          placeholder="Type your message..."
+        />
+      </div>
+      <button type="submit" class="btn btn-primary">Generate Plots</button>
+      <button type="button" id="clear-chat" class="btn btn-secondary">
+        Clear Session
+      </button>
+    </form>
+  </div>
+</div>
+<div id="progress-div" class="mt-3 d-none">
+  <!-- d-none makes it initially hidden -->
+  <div class="progress">
+    <div
+      id="progress-bar"
+      class="progress-bar"
+      role="progressbar"
+      style="width: 0%"
+      aria-valuenow="0"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      Plotting...
+    </div>
+  </div>
+</div>
+<div class="plot-frame">
+  <button type="button" class="btn btn-info select-btn">Select</button>
+  <div class="row">
+    <!-- Plot 1 Image -->
+    <div class="col-md-6" id="plot1-container">
+      <!-- Plot 1 will be injected here -->
+    </div>
+    <!-- Plot 1 Code -->
+    <div class="col-md-6">
+      <pre id="plot1-code"></pre>
+    </div>
+  </div>
+</div>
+
+<div class="plot-frame">
+  <button type="button" class="btn btn-info select-btn">Select</button>
+  <div class="row mt-5">
+    <!-- Plot 2 Image -->
+    <div class="col-md-6" id="plot2-container">
+      <!-- Plot 2 will be injected here -->
+    </div>
+    <!-- Plot 2 Code -->
+    <div class="col-md-6">
+      <pre id="plot2-code"></pre>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<style>
+  .plot-frame {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    display: none;
+  }
+  .highlighted {
+    border: 2px solid #00f;
+  }
+</style>
+<script>
+  $(document).ready(function () {
+    // Existing submission handler
+    $("#chat-form").on("submit", function (e) {
+      e.preventDefault();
+      // Show the progress bar
+      $("#progress-div").removeClass("d-none");
+      updateProgress(0); // initialize to 0%
+      generatePlots();
+    });
+
+    // Keypress handler for the input field
+    $("#message").on("keypress", function (e) {
+      if (e.which == 13) {
+        e.preventDefault(); // Prevent the default form submission on Enter
+        // Show the progress bar
+        $("#progress-div").removeClass("d-none");
+        updateProgress(0); // initialize to 0%
+        generatePlots();
+      }
+    });
+    $("#fileInput").on("change", getFileName);
+    $("#clear-chat").on("click", function () {
+      $("#chat-box").html(""); // This will clear the chat
+      $(".plot-frame").hide();
+    });
+    $(".select-btn").on("click", function () {
+      $(".plot-frame").removeClass("highlighted"); // Remove the highlighted class from all plot frames
+      $(".select-btn")
+        .addClass("btn-info")
+        .removeClass("btn-success")
+        .text("Select"); // Reset all buttons to the original state
+      $(this).closest(".plot-frame").addClass("highlighted"); // Add the highlighted class to the clicked plot frame
+      $(this).removeClass("btn-info").addClass("btn-success").text("Selected"); // Change the state of the clicked button
+    });
+
+    function getFileName() {
+      var input = document.getElementById("fileInput");
+      var file = input.files[0];
+      console.log(file.name);
+      if (file) {
+        $("#chat-box").append(`<p>Selected file: ${file.name}</p>`);
+        // $.post("/send_filename", { filename: file.name }, function (response) {
+        //   console.log(response); // Handle the response accordingly
+        // });
+        $.ajax({
+          url: "/send_filename",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ filename: file.name }),
+          success: function (response) {
+            console.log(response); // Handle the response accordingly
+          },
+          error: function (error) {
+            console.error(error); // Handle the error accordingly
+          },
+        });
+      }
+    }
+    // Function to handle the plot generation
+    function generatePlots() {
+      let message = $("#message").val().trim(); // Added trim to remove white spaces
+      if (message === "") {
+        alert("Please enter a message to generate plots."); // Alert the user or handle this case as needed
+        return; // Return from the function to avoid proceeding
+      }
+      $("#chat-box").append(`<p>You: ${message}</p>`);
+      // Simulated progress increase
+      let simulatedProgress = 0;
+      const progressInterval = setInterval(function () {
+        simulatedProgress += 5; // Increase by 5% every interval
+        updateProgress(simulatedProgress);
+
+        // If progress reaches or exceeds 90% (giving some room before real completion), clear the interval
+        if (simulatedProgress >= 90) {
+          clearInterval(progressInterval);
+        }
+      }, 300); // This fires every 100ms, adjust to your liking
+      $.post("/generate_plot", { message: message }, function (data) {
+        console.log("AJAX success callback triggered"); // Add this
+        clearInterval(progressInterval); // Clear the interval when AJAX request completes
+
+        if (data.plot1 && data.code1) {
+          $("#plot1-container").html(data.plot1);
+          $("#plot1-code").text(data.code1);
+          $(".plot-frame:first").show(); // Show the first frame when there is content
+        }
+
+        if (data.plot2 && data.code2) {
+          $("#plot2-container").html(data.plot2);
+          $("#plot2-code").text(data.code2);
+          $(".plot-frame:last").show(); // Show the second frame when there is content
+        }
+
+        updateProgress(100); // Mark as complete when data is received
+      });
+
+      $("#message").val("");
+    }
+    // Function to update the progress bar
+    function updateProgress(percentage) {
+      $("#progress-bar")
+        .css("width", percentage + "%")
+        .attr("aria-valuenow", percentage);
+      if (percentage >= 100) {
+        $("#progress-div").addClass("d-none"); // hide the progress bar when it reaches 100%
+      } else {
+        $("#progress-div").removeClass("d-none"); // ensure the progress bar is shown otherwise
+      }
+    }
+  });
+</script>
+{% endblock %}
